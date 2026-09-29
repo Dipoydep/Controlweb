@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel Ibu - Parental Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Neo-Brutalism Custom Style */
+    .neo-box {
+      border: 3px solid #000;
+      box-shadow: 4px 4px 0px #000;
+      transition: all 0.15s ease-in-out;
+    }
+    .neo-btn {
+      border: 3px solid #000;
+      box-shadow: 3px 3px 0px #000;
+      font-weight: 800;
+      transition: all 0.1s ease;
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #000;
+    }
+    /* Custom Toggle Switch Style */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #e2e8f0;
+      border: 2px solid #000;
+      transition: .2s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 16px; width: 16px; left: 3px; bottom: 3px;
+      background-color: #000; transition: .2s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #ef4444; }
+    input:checked + .slider:before { transform: translateX(20px); background-color: #fff; }
+    .protect-switch input:checked + .slider { background-color: #10b981; }
+  </style>
+</head>
+<body class="bg-[#FFFDF0] font-sans text-black p-4 md:p-8 min-h-screen">
+
+  <div class="max-w-2xl mx-auto space-y-5">
+    
+    <!-- HEADER -->
+    <header class="neo-box bg-[#3B82F6] p-5 rounded-xl text-white flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-black uppercase drop-shadow-[2px_2px_0px_#000] flex items-center gap-2">
+          <span>Panel Kontrol Ibu</span>
+          <svg class="w-7 h-7 inline-block text-white stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </h1>
+        <p class="text-xs font-bold text-black bg-[#FFDE59] inline-block px-2 py-0.5 mt-1 border border-black rounded">
+          Pantau & Blokir Aplikasi Anak
+        </p>
+      </div>
+    </header>
+
+    <!-- 1. PAIRING DEVICE SECTION -->
+    <section class="neo-box bg-[#E0F2FE] p-4 rounded-xl">
+      <h2 class="text-sm font-black uppercase mb-2 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+        </svg>
+        <span>Hubungkan HP Anak</span>
+      </h2>
+      <div class="flex gap-2">
+        <input type="text" id="pairCodeInput" placeholder="Masukkan 6 Digit Kode" maxlength="6" 
+               class="flex-1 border-2 border-black p-2 rounded-lg font-bold text-center tracking-widest text-lg neo-box bg-white focus:outline-none">
+        <button onclick="verifyPairCode()" class="neo-btn bg-[#2DD4BF] text-black px-4 py-2 rounded-lg text-sm uppercase flex items-center gap-1">
+          <span>HUBUNGKAN</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. PROTECT APK SWITCH -->
+    <section class="neo-box bg-[#FFE4E6] p-4 rounded-xl flex items-center justify-between">
+      <div>
+        <h2 class="text-sm font-black uppercase text-[#E11D48] flex items-center gap-1.5">
+          <svg class="w-4 h-4 stroke-[#E11D48] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span>Protect APK System</span>
+        </h2>
+        <p class="text-xs font-semibold text-gray-700">Cegah anak meng-uninstall / mematikan aplikasi ini</p>
+      </div>
+      <label class="switch protect-switch flex-shrink-0">
+        <input type="checkbox" id="protectToggle" onchange="toggleProtection(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </section>
+
+    <!-- 3. CUSTOM LOCK SCREEN HTML EDITOR -->
+    <section class="neo-box bg-[#FEF08A] p-4 rounded-xl space-y-2">
+      <h2 class="text-sm font-black uppercase text-black flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </svg>
+        <span>Tampilan Layar Blokir (Custom HTML)</span>
+      </h2>
+      <textarea id="customHtmlInput" placeholder="Contoh: <h1 style='color:red;'>Waktunya Belajar! Aplikasi Ini Diblokir Ibu.</h1>" 
+                class="w-full h-24 p-2 border-2 border-black rounded-lg font-mono text-xs bg-white focus:outline-none neo-box resize-y"></textarea>
+      <button onclick="saveCustomHtml()" class="neo-btn bg-[#FB923C] text-black w-full py-2 rounded-lg text-xs uppercase">
+        Simpan Tampilan Blokir
+      </button>
+    </section>
+
+    <!-- 4. REALTIME APP LIST -->
+    <section class="neo-box bg-white p-5 rounded-xl space-y-3">
+      <div class="flex justify-between items-center border-b-2 border-black pb-2">
+        <h2 class="text-sm font-black uppercase flex items-center gap-1.5">
+          <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <span>Daftar Aplikasi HP Anak</span>
+        </h2>
+        <span id="appCount" class="bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full">0 App</span>
+      </div>
+
+      <div id="appList" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+        <div class="text-center py-6 text-xs font-bold text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+          Hubungkan kode 6 digit dari HP Anak untuk menampilkan aplikasi.
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. REALTIME ACTIVITY LOG / TERMINAL -->
+    <section class="neo-box bg-[#18181B] text-[#4ADE80] p-4 rounded-xl font-mono text-xs space-y-2">
+      <div class="flex justify-between items-center border-b border-gray-700 pb-2 text-white">
+        <span class="font-bold flex items-center gap-1.5">
+          <svg class="w-4 h-4 stroke-[#4ADE80] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>Log Aktivitas Realtime</span>
+        </span>
+        <button onclick="clearLog()" class="text-[10px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-0.5 rounded border border-gray-600">
+          Clear
+        </button>
+      </div>
+      <div id="consoleLog" class="h-28 overflow-y-auto space-y-1 pr-1">
+        <p class="text-gray-400">[SYSTEM] Panel Kontrol Ibu siap...</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Firebase SDK Modules (Pakai SDK 12.19.0 Sesuai Request) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    // Firebase Config milik kamu (nweacsess)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBD0bJ-VZItWfS95ofGmiNH6Ee2zNe1av8",
+      authDomain: "nweacsess.firebaseapp.com",
+      databaseURL: "https://nweacsess-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "nweacsess",
+      storageBucket: "nweacsess.firebasestorage.app",
+      messagingSenderId: "313136750773",
+      appId: "1:313136750773:web:6d30a26212137be5735efc"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let activeDeviceId = null;
+
+    // Helper Fungsi Logging
+    window.addLog = function(msg, type = 'INFO') {
+      const consoleBox = document.getElementById('consoleLog');
+      if (!consoleBox) return;
+      const p = document.createElement('p');
+      const time = new Date().toLocaleTimeString();
+      p.innerText = `[${time}] [${type}] ${msg}`;
+      consoleBox.appendChild(p);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    };
+
+    window.clearLog = function() {
+      document.getElementById('consoleLog').innerHTML = '';
+      window.addLog('Log dibersihkan.');
+    };
+
+    // A. VERIFIKASI KODE PAIRING 6 DIGIT
+    window.verifyPairCode = function() {
+      const code = document.getElementById('pairCodeInput').value.trim();
+      if (code.length !== 6) {
+        alert("Masukkan 6 digit kode dari HP Anak!");
+        return;
+      }
+
+      window.addLog(`Mencoba verifikasi kode pairing: ${code}...`);
+
+      get(ref(database, `pending_pairings/${code}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+          activeDeviceId = snapshot.val().deviceId;
+          window.addLog(`Berhasil terhubung ke HP Anak! ID: ${activeDeviceId}`, 'SUCCESS');
+          alert("Berhasil terhubung ke HP Anak!");
+          
+          set(ref(database, `pending_pairings/${code}/status`), "SUCCESS");
+          loadDeviceData(activeDeviceId);
+        } else {
+          window.addLog(`Kode ${code} tidak ditemukan atau kadaluwarsa!`, 'ERROR');
+          alert("Kode pairing tidak ditemukan!");
+        }
+      }).catch((err) => {
+        window.addLog(`Error Firebase: ${err.message}`, 'ERROR');
+      });
+    };
+
+    // B. BACA & SYNC DATA REALTIME DARI HP ANAK
+    function loadDeviceData(deviceId) {
+      // 1. Protection Toggle Status
+      onValue(ref(database, `devices/${deviceId}/settings/protection_enabled`), (snap) => {
+        const isProtected = snap.val() || false;
+        document.getElementById('protectToggle').checked = isProtected;
+        window.addLog(`Status Protect System diubah: ${isProtected ? 'AKTIF' : 'NONAKTIF'}`);
+      });
+
+      // 2. Custom Lock Screen Text
+      get(ref(database, `devices/${deviceId}/settings/custom_lock_html`)).then((snap) => {
+        if (snap.exists()) {
+          document.getElementById('customHtmlInput').value = snap.val();
+        }
+      });
+
+      // 3. Realtime App List
+      onValue(ref(database, `devices/${deviceId}/installed_apps`), (snap) => {
+        const apps = snap.val();
+        const appListEl = document.getElementById('appList');
+
+        if (!apps) {
+          appListEl.innerHTML = '<div class="text-center py-4 text-xs font-bold text-gray-500">Belum ada data aplikasi dari HP Anak.</div>';
+          document.getElementById('appCount').innerText = '0 App';
+          return;
+        }
+
+        appListEl.innerHTML = '';
+        const keys = Object.keys(apps);
+        document.getElementById('appCount').innerText = `${keys.length} App`;
+
+        keys.forEach((key) => {
+          const item = apps[key];
+          const isBlocked = item.blocked || false;
+
+          const card = document.createElement('div');
+          card.className = 'neo-box bg-[#F8FAFC] p-3 rounded-lg flex items-center justify-between gap-2';
+          card.innerHTML = `
+            <div class="overflow-hidden">
+              <h3 class="font-bold text-xs truncate">${item.appName || item.packageName}</h3>
+              <p class="text-[10px] text-gray-500 font-mono truncate">${item.packageName}</p>
+            </div>
+            <label class="switch flex-shrink-0">
+              <input type="checkbox" ${isBlocked ? 'checked' : ''} onchange="toggleBlock('${key}', '${item.appName || item.packageName}', this.checked)">
+              <span class="slider"></span>
+            </label>
+          `;
+          appListEl.appendChild(card);
+        });
+        window.addLog(`Daftar aplikasi diperbarui (${keys.length} aplikasi)`);
+      });
+    }
+
+    // C. TOGGLE & SIMPAN KE DATABASE
+    window.toggleProtection = function(isProtected) {
+      if (!activeDeviceId) return alert("Hubungkan HP Anak dulu!");
+      set(ref(database, `devices/${activeDeviceId}/settings/protection_enabled`), isProtected)
+        .then(() => window.addLog(`Protect APK diset ke: ${isProtected}`))
+        .catch(err => window.addLog(`Gagal ubah Protect APK: ${err.message}`, 'ERROR'));
+    };
+
+    window.toggleBlock = function(appKey, appName, isBlocked) {
+      if (!activeDeviceId) return alert("Hubungkan HP Anak dulu!");
+      set(ref(database, `devices/${activeDeviceId}/installed_apps/${appKey}/blocked`), isBlocked)
+        .then(() => window.addLog(`Aplikasi '${appName}' status blokir: ${isBlocked ? 'DIBLOKIR' : 'DIBUKA'}`))
+        .catch(err => window.addLog(`Gagal update status blokir: ${err.message}`, 'ERROR'));
+    };
+
+    window.saveCustomHtml = function() {
+      if (!activeDeviceId) return alert("Hubungkan HP Anak dulu!");
+      const htmlContent = document.getElementById('customHtmlInput').value;
+      set(ref(database, `devices/${activeDeviceId}/settings/custom_lock_html`), htmlContent)
+        .then(() => {
+          window.addLog(`Tampilan Lock Screen baru berhasil disimpan!`);
+          alert("Tampilan blokir berhasil disimpan!");
+        })
+        .catch(err => window.addLog(`Gagal simpan HTML: ${err.message}`, 'ERROR'));
+    };
+  </script>
+</body>
+</html>
