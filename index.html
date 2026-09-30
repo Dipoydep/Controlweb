@@ -110,9 +110,27 @@
       </h2>
       <textarea id="customHtmlInput" placeholder="Contoh: <h1 style='color:red;'>Waktunya Belajar! Aplikasi Ini Diblokir Ibu.</h1>" 
                 class="w-full h-24 p-2 border-2 border-black rounded-lg font-mono text-xs bg-white focus:outline-none neo-box resize-y"></textarea>
+      
+      <!-- Tombol Simpan Tampilan Blokir -->
       <button onclick="saveCustomHtml()" class="neo-btn bg-[#FB923C] text-black w-full py-2 rounded-lg text-xs uppercase">
         Simpan Tampilan Blokir
       </button>
+
+      <!-- TAMBAHAN: EKSEKUSI RUN / STOP BLOKIR -->
+      <div class="pt-3 border-t-2 border-black space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold">
+          <span>Status Eksekusi Blokir:</span>
+          <span id="runStatusBadge" class="px-2 py-0.5 rounded border border-black bg-red-400 text-white uppercase text-[10px]">STOPPED</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="setBlockExecution(true)" class="neo-btn bg-[#22C55E] text-white flex-1 py-2 rounded-lg text-xs uppercase">
+            ▶ RUN BLOKIR
+          </button>
+          <button onclick="setBlockExecution(false)" class="neo-btn bg-[#EF4444] text-white flex-1 py-2 rounded-lg text-xs uppercase">
+            ⏹ STOP BLOKIR
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- 4. REALTIME APP LIST -->
@@ -227,10 +245,23 @@
         window.addLog(`Status Protect System diubah: ${isProtected ? 'AKTIF' : 'NONAKTIF'}`);
       });
 
-      // 2. Custom Lock Screen Text
+      // 2. Custom Lock Screen Text & Status Run
       get(ref(database, `devices/${deviceId}/settings/custom_lock_html`)).then((snap) => {
         if (snap.exists()) {
           document.getElementById('customHtmlInput').value = snap.val();
+        }
+      });
+
+      // TAMBAHAN: Listener Status Is Running
+      onValue(ref(database, `devices/${deviceId}/settings/is_running`), (snap) => {
+        const isRunning = snap.val() || false;
+        const badge = document.getElementById('runStatusBadge');
+        if (isRunning) {
+          badge.innerText = "RUNNING";
+          badge.className = "px-2 py-0.5 rounded border border-black bg-green-500 text-white uppercase text-[10px]";
+        } else {
+          badge.innerText = "STOPPED";
+          badge.className = "px-2 py-0.5 rounded border border-black bg-red-400 text-white uppercase text-[10px]";
         }
       });
 
@@ -280,14 +311,14 @@
     };
 
     window.toggleBlock = function(appKey, appName, isBlocked) {
-      if (!activeDeviceId) return alert("Hubungkan HP Anak dulu!");
+      if (!activeDeviceId) return alert("Hubungkan HP dulu!");
       set(ref(database, `devices/${activeDeviceId}/installed_apps/${appKey}/blocked`), isBlocked)
         .then(() => window.addLog(`Aplikasi '${appName}' status blokir: ${isBlocked ? 'DIBLOKIR' : 'DIBUKA'}`))
         .catch(err => window.addLog(`Gagal update status blokir: ${err.message}`, 'ERROR'));
     };
 
     window.saveCustomHtml = function() {
-      if (!activeDeviceId) return alert("Hubungkan HP Anak dulu!");
+      if (!activeDeviceId) return alert("Hubungkan HP dulu!");
       const htmlContent = document.getElementById('customHtmlInput').value;
       set(ref(database, `devices/${activeDeviceId}/settings/custom_lock_html`), htmlContent)
         .then(() => {
@@ -295,6 +326,17 @@
           alert("Tampilan blokir berhasil disimpan!");
         })
         .catch(err => window.addLog(`Gagal simpan HTML: ${err.message}`, 'ERROR'));
+    };
+
+    // TAMBAHAN: FUNGSI EKSEKUSI RUN / STOP
+    window.setBlockExecution = function(shouldRun) {
+      if (!activeDeviceId) return alert("Hubungkan HP dulu!");
+      set(ref(database, `devices/${activeDeviceId}/settings/is_running`), shouldRun)
+        .then(() => {
+          window.addLog(`Status Eksekusi Pemblokiran diset ke: ${shouldRun ? 'RUNNING' : 'STOPPED'}`, shouldRun ? 'SUCCESS' : 'INFO');
+          alert(shouldRun ? "Eksekusi Blokir DIMALAI (RUN)!" : "Eksekusi Blokir DIHENTIKAN (STOP)!");
+        })
+        .catch(err => window.addLog(`Gagal mengubah status eksekusi: ${err.message}`, 'ERROR'));
     };
   </script>
 </body>
