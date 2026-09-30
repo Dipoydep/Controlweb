@@ -293,7 +293,7 @@
 
           loadDeviceData(activeDeviceId);
         } else {
-          window.addLog(`Kode ${code} tidak ditemukan atau kadaluwarsa!`, 'ERROR');
+          window.addLog(`Kode ${code} tidak ditemukan!`, 'ERROR');
           alert("Kode pairing tidak ditemukan!");
         }
       }).catch((err) => {
@@ -301,7 +301,7 @@
       });
     };
 
-    // B. BACA & SYNC DATA REALTIME DARI HP ANAK
+    // B. BACA & SYNC DATA REALTIME DARI HP Target
     function loadDeviceData(deviceId) {
       // 1. Protection Toggle Status
       onValue(ref(database, `devices/${deviceId}/settings/protection_enabled`), (snap) => {
