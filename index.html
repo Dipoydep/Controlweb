@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -76,18 +77,20 @@
 
       <!-- TAMBAHAN: Status koneksi tersimpan -->
       <div id="pairedStatusBox" class="hidden mb-2 flex items-center justify-between gap-2 p-2 neo-box bg-[#DCFCE7] rounded-lg">
-        <span class="text-xs font-bold">✅ Terhubung ke HP Anak (ID: <span id="pairedDeviceIdText" class="font-mono"></span>)</span>
+        <span class="text-xs font-bold">✅ Terhubung: <span id="pairedDeviceIdText" class="font-mono"></span></span>
         <button onclick="disconnectDevice()" class="neo-btn bg-white text-black px-2 py-1 rounded text-[10px] uppercase">
           Putuskan
         </button>
       </div>
 
-      <div id="pairInputBox" class="flex gap-2">
-        <input type="text" id="pairCodeInput" placeholder="Masukkan 6 Digit Kode" maxlength="6" 
-               class="flex-1 border-2 border-black p-2 rounded-lg font-bold text-center tracking-widest text-lg neo-box bg-white focus:outline-none">
-        <button onclick="verifyPairCode()" class="neo-btn bg-[#2DD4BF] text-black px-4 py-2 rounded-lg text-sm uppercase flex items-center gap-1">
-          <span>HUBUNGKAN</span>
-        </button>
+      <!-- TAMBAHAN: Daftar device otomatis terdeteksi (tanpa kode pairing) -->
+      <div id="deviceListBox" class="space-y-2">
+        <p class="text-[11px] font-semibold text-gray-600">Perangkat terdeteksi otomatis setelah APK dibuka (maks. 3 perangkat). Tap "HUBUNGKAN" untuk pakai fiturnya:</p>
+        <div id="deviceList" class="space-y-2">
+          <div class="text-center py-4 text-xs font-bold text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+            Belum ada perangkat terdeteksi. Buka aplikasi di HP Anak.
+          </div>
+        </div>
       </div>
     </section>
 
@@ -106,6 +109,56 @@
         <input type="checkbox" id="protectToggle" onchange="toggleProtection(this.checked)">
         <span class="slider"></span>
       </label>
+    </section>
+
+    <!-- TAMBAHAN: LOCK HP (KUNCI LAYAR PENUH + PIN) -->
+    <section class="neo-box bg-[#DBEAFE] p-4 rounded-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-black uppercase text-[#1D4ED8] flex items-center gap-1.5">
+            <svg class="w-4 h-4 stroke-[#1D4ED8] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Lock HP (Layar Penuh)</span>
+          </h2>
+          <p class="text-xs font-semibold text-gray-700">Kunci seluruh layar HP, hanya bisa dibuka pakai PIN</p>
+        </div>
+      </div>
+
+      <!-- TAMBAHAN: Status + tombol Run/Stop khusus Lock HP (terpisah dari Run/Stop Blokir App) -->
+      <div class="pt-1 space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold">
+          <span>Status Lock HP:</span>
+          <span id="lockStatusBadge" class="px-2 py-0.5 rounded border border-black bg-red-400 text-white uppercase text-[10px]">STOPPED</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="toggleScreenLock(true)" class="neo-btn bg-[#22C55E] text-white flex-1 py-2 rounded-lg text-xs uppercase flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span>RUN LOCK</span>
+          </button>
+          <button onclick="toggleScreenLock(false)" class="neo-btn bg-[#EF4444] text-white flex-1 py-2 rounded-lg text-xs uppercase flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"/></svg>
+            <span>STOP LOCK</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-gray-600">PIN (default: 1234)</label>
+        <input type="text" id="lockPinInput" placeholder="1234" maxlength="8"
+               class="w-full border-2 border-black p-2 rounded-lg font-bold text-center neo-box bg-white focus:outline-none text-sm">
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase text-gray-600">Tampilan Layar Lock HP (Custom HTML)</label>
+        <textarea id="lockHtmlInput" placeholder="Contoh: <h1 style='color:white;text-align:center'>HP diblokir sampai jam belajar selesai ya!</h1>"
+                  class="w-full h-24 p-2 border-2 border-black rounded-lg font-mono text-xs bg-white focus:outline-none neo-box resize-y"></textarea>
+        <p class="text-[10px] text-gray-500 mt-1">Kosongkan untuk pakai tampilan default (ikon gembok + "HP Sudah Diblokir"). PIN pad tetap selalu muncul di bawahnya.</p>
+      </div>
+
+      <button onclick="saveLockSettings()" class="neo-btn bg-[#3B82F6] text-white w-full py-2 rounded-lg text-xs uppercase">
+        Simpan PIN & Tampilan
+      </button>
     </section>
 
     <!-- 3. CUSTOM LOCK SCREEN HTML EDITOR -->
@@ -131,17 +184,19 @@
           <span id="runStatusBadge" class="px-2 py-0.5 rounded border border-black bg-red-400 text-white uppercase text-[10px]">STOPPED</span>
         </div>
         <div class="flex gap-2">
-          <button onclick="setBlockExecution(true)" class="neo-btn bg-[#22C55E] text-white flex-1 py-2 rounded-lg text-xs uppercase">
-            ▶ RUN BLOKIR
+          <button onclick="setBlockExecution(true)" class="neo-btn bg-[#22C55E] text-white flex-1 py-2 rounded-lg text-xs uppercase flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span>RUN BLOKIR</span>
           </button>
-          <button onclick="setBlockExecution(false)" class="neo-btn bg-[#EF4444] text-white flex-1 py-2 rounded-lg text-xs uppercase">
-            ⏹ STOP BLOKIR
+          <button onclick="setBlockExecution(false)" class="neo-btn bg-[#EF4444] text-white flex-1 py-2 rounded-lg text-xs uppercase flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"/></svg>
+            <span>STOP BLOKIR</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- 4.REALTIME APP LIST -->
+    <!-- 4. REALTIME APP LIST -->
     <section class="neo-box bg-white p-5 rounded-xl space-y-3">
       <div class="flex justify-between items-center border-b-2 border-black pb-2">
         <h2 class="text-sm font-black uppercase flex items-center gap-1.5">
@@ -221,18 +276,57 @@
     };
 
     // TAMBAHAN: Update tampilan status pairing (terhubung / belum)
-    function updatePairedUI(deviceId) {
+    function updatePairedUI(deviceId, label) {
       const statusBox = document.getElementById('pairedStatusBox');
-      const inputBox = document.getElementById('pairInputBox');
+      const listBox = document.getElementById('deviceListBox');
       const idText = document.getElementById('pairedDeviceIdText');
       if (deviceId) {
-        idText.innerText = deviceId;
+        idText.innerText = label || deviceId;
         statusBox.classList.remove('hidden');
-        inputBox.classList.add('hidden');
+        listBox.classList.add('hidden');
       } else {
         statusBox.classList.add('hidden');
-        inputBox.classList.remove('hidden');
+        listBox.classList.remove('hidden');
       }
+    }
+
+    // TAMBAHAN: Sambungkan ke device yang dipilih dari daftar
+    window.connectToDevice = function(deviceId, label) {
+      activeDeviceId = deviceId;
+      savePairedDevice(deviceId);
+      updatePairedUI(deviceId, label);
+      window.addLog(`Terhubung ke perangkat: ${label} (${deviceId})`, 'SUCCESS');
+      loadDeviceData(deviceId);
+    };
+
+    // TAMBAHAN: Dengarkan daftar semua device yang otomatis mendaftar ke Firebase
+    function listenDeviceList() {
+      onValue(ref(database, 'devices'), (snap) => {
+        const listEl = document.getElementById('deviceList');
+        if (!listEl) return;
+        const data = snap.val();
+        if (!data) {
+          listEl.innerHTML = '<div class="text-center py-4 text-xs font-bold text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">Belum ada perangkat terdeteksi. Buka aplikasi di HP Anak.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        // TAMBAHAN: batasi tampilan maksimal 3 perangkat
+        Object.keys(data).slice(0, 3).forEach((id) => {
+          const info = data[id].info || {};
+          const label = info.model || id;
+          const card = document.createElement('div');
+          card.className = 'neo-box bg-white p-3 rounded-lg flex items-center justify-between gap-2';
+          card.innerHTML = `
+            <div class="overflow-hidden">
+              <h3 class="font-bold text-xs truncate">${label}</h3>
+              <p class="text-[10px] text-gray-500 font-mono truncate">${id}</p>
+            </div>
+            <button class="neo-btn bg-[#2DD4BF] text-black px-3 py-1.5 rounded-lg text-[10px] uppercase flex-shrink-0">HUBUNGKAN</button>
+          `;
+          card.querySelector('button').onclick = () => window.connectToDevice(id, label);
+          listEl.appendChild(card);
+        });
+      });
     }
 
     // TAMBAHAN: Simpan device yang sudah terhubung ke localStorage
@@ -255,59 +349,39 @@
       window.addLog('Koneksi ke HP Anak diputuskan dari panel ini.');
     };
 
-    // TAMBAHAN: Saat halaman dibuka lagi, cek apakah sudah pernah pairing sebelumnya
+    // TAMBAHAN: Halaman TIDAK auto-connect lagi walau ada koneksi tersimpan
+    // sebelumnya. Device harus dipilih/di-tap manual dulu tiap buka panel
+    // sebelum fitur-fiturnya bisa dipakai.
     function restorePairingIfAny() {
-      let savedId = null;
-      try {
-        savedId = localStorage.getItem(STORAGE_KEY);
-      } catch (e) {}
-      if (savedId) {
-        activeDeviceId = savedId;
-        updatePairedUI(savedId);
-        window.addLog(`Memuat kembali koneksi tersimpan (ID: ${savedId})...`);
-        loadDeviceData(savedId);
-      }
+      listenDeviceList();
     }
 
-    // A. VERIFIKASI KODE PAIRING 6 DIGIT
-    window.verifyPairCode = function() {
-      const code = document.getElementById('pairCodeInput').value.trim();
-      if (code.length !== 6) {
-        alert("Masukkan 6 digit kode dari HP Anak!");
-        return;
-      }
-
-      window.addLog(`Mencoba verifikasi kode pairing: ${code}...`);
-
-      get(ref(database, `pending_pairings/${code}`)).then((snapshot) => {
-        if (snapshot.exists()) {
-          activeDeviceId = snapshot.val().deviceId;
-          window.addLog(`Berhasil terhubung ke HP Anak! ID: ${activeDeviceId}`, 'SUCCESS');
-          alert("Berhasil terhubung ke HP Anak!");
-          
-          set(ref(database, `pending_pairings/${code}/status`), "SUCCESS");
-
-          // TAMBAHAN: simpan pairing supaya tidak hilang saat Chrome ditutup/restart
-          savePairedDevice(activeDeviceId);
-          updatePairedUI(activeDeviceId);
-
-          loadDeviceData(activeDeviceId);
-        } else {
-          window.addLog(`Kode ${code} tidak ditemukan!`, 'ERROR');
-          alert("Kode pairing tidak ditemukan!");
-        }
-      }).catch((err) => {
-        window.addLog(`Error Firebase: ${err.message}`, 'ERROR');
-      });
-    };
-
-    // B. BACA & SYNC DATA REALTIME DARI HP Target
+    // B. BACA & SYNC DATA REALTIME DARI HP ANAK
     function loadDeviceData(deviceId) {
       // 1. Protection Toggle Status
       onValue(ref(database, `devices/${deviceId}/settings/protection_enabled`), (snap) => {
         const isProtected = snap.val() || false;
         document.getElementById('protectToggle').checked = isProtected;
         window.addLog(`Status Protect System diubah: ${isProtected ? 'AKTIF' : 'NONAKTIF'}`);
+      });
+
+      // TAMBAHAN: Lock HP - status badge, PIN, dan tampilan custom
+      onValue(ref(database, `devices/${deviceId}/settings/screen_locked`), (snap) => {
+        const isLocked = snap.val() || false;
+        const badge = document.getElementById('lockStatusBadge');
+        if (isLocked) {
+          badge.innerText = "RUNNING";
+          badge.className = "px-2 py-0.5 rounded border border-black bg-green-500 text-white uppercase text-[10px]";
+        } else {
+          badge.innerText = "STOPPED";
+          badge.className = "px-2 py-0.5 rounded border border-black bg-red-400 text-white uppercase text-[10px]";
+        }
+      });
+      get(ref(database, `devices/${deviceId}/settings/lock_pin`)).then((snap) => {
+        document.getElementById('lockPinInput').value = snap.exists() ? snap.val() : '';
+      });
+      get(ref(database, `devices/${deviceId}/settings/lock_html`)).then((snap) => {
+        document.getElementById('lockHtmlInput').value = snap.exists() ? snap.val() : '';
       });
 
       // 2. Custom Lock Screen Text & Status Run
@@ -366,6 +440,28 @@
         window.addLog(`Daftar aplikasi diperbarui (${keys.length} aplikasi)`);
       });
     }
+
+    // TAMBAHAN: Lock HP - toggle kunci layar penuh
+    window.toggleScreenLock = function(isLocked) {
+      if (!activeDeviceId) return alert("Hubungkan HP dulu!");
+      set(ref(database, `devices/${activeDeviceId}/settings/screen_locked`), isLocked)
+        .then(() => window.addLog(`Lock HP diset ke: ${isLocked ? 'TERKUNCI' : 'TERBUKA'}`, isLocked ? 'SUCCESS' : 'INFO'))
+        .catch(err => window.addLog(`Gagal ubah Lock HP: ${err.message}`, 'ERROR'));
+    };
+
+    // TAMBAHAN: Simpan PIN & tampilan custom HTML layar kunci
+    window.saveLockSettings = function() {
+      if (!activeDeviceId) return alert("Hubungkan HP dulu!");
+      const pin = document.getElementById('lockPinInput').value.trim() || "1234";
+      const html = document.getElementById('lockHtmlInput').value;
+      set(ref(database, `devices/${activeDeviceId}/settings/lock_pin`), pin)
+        .then(() => set(ref(database, `devices/${activeDeviceId}/settings/lock_html`), html))
+        .then(() => {
+          window.addLog(`PIN & tampilan Lock HP disimpan (PIN: ${pin}).`, 'SUCCESS');
+          alert("PIN & tampilan berhasil disimpan!");
+        })
+        .catch(err => window.addLog(`Gagal simpan pengaturan Lock HP: ${err.message}`, 'ERROR'));
+    };
 
     // C. TOGGLE & SIMPAN KE DATABASE
     window.toggleProtection = function(isProtected) {
