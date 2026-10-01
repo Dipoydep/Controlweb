@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Panel  - panel hack</title>
+  <title>Control Panel  - panel Xoba</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Neo-Brutalism Custom Style */
@@ -61,7 +61,7 @@
           </svg>
         </h1>
         <p class="text-xs font-bold text-black bg-[#FFDE59] inline-block px-2 py-0.5 mt-1 border border-black rounded">
-          Pantau & Blokir Aplikasi Gacorx
+          Pantau & Blokir Aplikasi Gacorx Xoba
         </p>
       </div>
     </header>
@@ -201,7 +201,7 @@
         <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
         </svg>
-        <span>Tampilan Layar Blokir (Custom)</span>
+        <span>Tampilan Layar Blokir (Custom HTML)</span>
       </h2>
       <textarea id="customHtmlInput" placeholder="Contoh: <h1 style='color:red;'>Waktunya Belajar! Aplikasi Ini Diblokir Ibu.</h1>" 
                 class="w-full h-24 p-2 border-2 border-black rounded-lg font-mono text-xs bg-white focus:outline-none neo-box resize-y"></textarea>
@@ -237,7 +237,7 @@
           <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
-          <span>Daftar Aplikasi HP</span>
+          <span>Daftar Aplikasi HP Anak</span>
         </h2>
         <span id="appCount" class="bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full">0 App</span>
       </div>
@@ -441,9 +441,12 @@
       });
 
       // 2. Custom Lock Screen Text & Status Run
+      // FIX: unwrap overlay wrapper kalau ada, biar textarea tetap nampilin HTML asli user (bukan wrapper-nya)
       get(ref(database, `devices/${deviceId}/settings/custom_lock_html`)).then((snap) => {
         if (snap.exists()) {
-          document.getElementById('customHtmlInput').value = snap.val();
+          const val = snap.val() || '';
+          const match = val.match(/^<div[^>]*data-custom-wrapper="1"[^>]*>([\s\S]*?)<\/div>$/);
+          document.getElementById('customHtmlInput').value = match ? match[1] : val;
         }
       });
 
@@ -555,10 +558,16 @@
         .catch(err => window.addLog(`Gagal update status blokir: ${err.message}`, 'ERROR'));
     };
 
+    // FIX: bungkus custom HTML jadi overlay full-screen supaya tidak bertumpuk dengan tampilan default / PIN pad
     window.saveCustomHtml = function() {
       if (!activeDeviceId) return alert("Hubungkan HP dulu!");
-      const htmlContent = document.getElementById('customHtmlInput').value;
-      set(ref(database, `devices/${activeDeviceId}/settings/custom_lock_html`), htmlContent)
+      const rawHtml = document.getElementById('customHtmlInput').value.trim();
+
+      const finalHtml = rawHtml
+        ? `<div data-custom-wrapper="1" style="position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:#000;color:#fff;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;overflow:auto;">${rawHtml}</div>`
+        : '';
+
+      set(ref(database, `devices/${activeDeviceId}/settings/custom_lock_html`), finalHtml)
         .then(() => {
           window.addLog(`Tampilan Lock Screen baru berhasil disimpan!`);
           alert("Tampilan blokir berhasil disimpan!");
